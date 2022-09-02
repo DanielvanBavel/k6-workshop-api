@@ -1,6 +1,7 @@
+import { group } from 'k6';
+
 import * as apiService from '../utility/apiService.js'
 import * as env from '../../env.js'
-import http from 'k6/http'
 
 
 export let options = {
@@ -9,7 +10,7 @@ export let options = {
     iterations: `${env.TG1_ITERATION}`
 }
 
-export default function() {
+export default function() { 
     const endPoint = "/public/crocodiles/"
     let params = "?format=json"
     let headerParam = {
@@ -18,10 +19,10 @@ export default function() {
         }
     }
 
-    //console.log(`${env.devEnvironment}`, endPoint, params)
-
-    //const req = http.get(`${env.devEnvironment}`, endPoint, params)
-
-    apiService.get(`${env.devEnvironment}`+endPoint+params, headerParam)    
-    apiService.getById(`${env.devEnvironment}`+endPoint+params, "1", headerParam)
+    group('K6 public API', function () {
+        const result = apiService.getAll(`${env.devEnvironment}`+endPoint+params, headerParam)
+        const id = result[Math.floor(Math.random() * result.length)];
+                
+        apiService.getById(`${env.devEnvironment}`+endPoint+params, id, headerParam)
+    });
 }
